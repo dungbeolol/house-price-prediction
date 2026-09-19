@@ -50,10 +50,27 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def encode_categorical(df: pd.DataFrame) -> pd.DataFrame:
-    """One-hot encode các cột dạng chuỗi (city, statezip)."""
+def encode_categorical(df: pd.DataFrame, min_count: int = 30) -> pd.DataFrame:
+    """One-hot encode cột city (đã gộp nhóm hiếm) và loại statezip.
+
+    Lý do:
+    - `statezip` gần như trùng thông tin với `city` (mỗi statezip nằm
+      trong đúng 1 city) -> giữ cả 2 gây đa cộng tuyến và bùng nổ số
+      chiều (one-hot 2 cột x hàng chục category -> hàng trăm cột),
+      khiến Linear/Ridge Regression overfit nặng (R2 âm khi test).
+    - Với các thành phố có quá ít mẫu, gộp thành nhóm "Other" để tránh
+      one-hot sinh ra cột gần như toàn 0 (rất dễ overfit).
+    """
     df = df.copy()
-    df = pd.get_dummies(df, columns=["city", "statezip"], drop_first=True)
+
+    if "statezip" in df.columns:
+        df = df.drop(columns=["statezip"])
+
+    city_counts = df["city"].value_counts()
+    rare_cities = city_counts[city_counts < min_count].index
+    df["city"] = df["city"].where(~df["city"].isin(rare_cities), "Other")
+
+    df = pd.get_dummies(df, columns=["city"], drop_first=True)
     return df
 
 

@@ -18,3 +18,15 @@ def print_section(title: str):
     print("\n" + "=" * 60)
     print(title)
     print("=" * 60)
+
+
+def get_final_estimator(model):
+    """Trả về estimator cuối cùng, dù model là Pipeline hay estimator thường.
+
+    Cần thiết vì train.py có thể lưu Pipeline(scaler + model) cho
+    LinearRegression/RidgeCV, nhưng evaluate.py muốn lấy trực tiếp
+    coef_/feature_importances_ của model bên trong.
+    """
+    if hasattr(model, "named_steps"):
+        return model.named_steps["model"]
+    return model

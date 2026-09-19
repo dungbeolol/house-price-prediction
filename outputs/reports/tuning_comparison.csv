@@ -1,0 +1,4 @@
+model,RMSLE_5fold
+XGBoost_baseline_Part4,0.295217506055386
+XGBoost_tuned,0.295217506055386
+RandomForest_tuned,0.3080582321546797
