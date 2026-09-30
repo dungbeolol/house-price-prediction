@@ -1,0 +1,3 @@
+# Cài thêm để chạy test: pip install -r requirements-dev.txt
+-r requirements.txt
+pytest>=8.0,<10

@@ -1,4 +1,5 @@
 model,RMSLE_5fold
-XGBoost_baseline_Part4,0.295217506055386
-XGBoost_tuned,0.295217506055386
-RandomForest_tuned,0.3080582321546797
+CatBoost_tuned (mới),0.29331873881219606
+best_model.pkl (đã lưu),0.29408486821717084
+XGBoost_tuned (mới),0.295217506055386
+RandomForest_tuned (mới),0.3080582321546797

@@ -1,0 +1,75 @@
+# config.yaml
+# Toàn bộ tham số của project nằm ở đây: đường dẫn, seed, tỉ lệ split,
+# siêu tham số từng model, cấu hình stacking và tuning.
+# Sửa file này thay vì sửa hằng số rải rác trong src/*.py.
+# (Có thể trỏ sang file config khác bằng biến môi trường HPP_CONFIG.)
+
+seed: 42          # dùng chung cho split, KFold, và mọi model có random_state
+n_jobs: -1        # số luồng cho các model hỗ trợ song song (-1 = tất cả CPU)
+
+# Đường dẫn: tương đối so với THƯ MỤC GỐC của project (chứa file này),
+# nên chạy script từ đâu (gốc hay src/) cũng được.
+paths:
+  raw_data: data/raw/modified_data.csv
+  processed_data: data/processed/cleaned_data.csv
+  model: models/best_model.pkl
+  schema: models/feature_schema.json
+  model_meta: models/model_meta.json   # phiên bản thư viện + metric lúc train
+  figures_dir: outputs/figures
+  reports_dir: outputs/reports
+
+data:
+  target: price
+  test_size: 0.2
+
+preprocessing:
+  min_city_count: 30   # thành phố < ngưỡng này bị gộp thành "Other"
+
+cv:
+  n_splits: 5          # K-fold dùng để so sánh model ở train.py / tune.py
+
+# --- Siêu tham số 8 model đơn (giữ nguyên giá trị đã dùng ở Phần 4) ---
+models:
+  ridge:
+    alphas: [0.1, 1.0, 10.0, 50.0, 100.0, 300.0]
+  decision_tree:
+    max_depth: 8
+    min_samples_leaf: 5
+  random_forest:
+    n_estimators: 300
+    max_depth: 12
+  extra_trees:
+    n_estimators: 300
+    max_depth: 12
+  gradient_boosting:
+    n_estimators: 300
+    max_depth: 3
+    learning_rate: 0.05
+    subsample: 0.8
+  xgboost:
+    n_estimators: 400
+    max_depth: 4
+    learning_rate: 0.05
+    subsample: 0.8
+    colsample_bytree: 0.8
+  catboost:
+    n_estimators: 400
+    max_depth: 6
+    learning_rate: 0.05
+
+# --- Stacking ensemble: model thứ 9 ---
+# Các base model dự đoán ngoài-fold (out-of-fold), rồi final_estimator
+# (RidgeCV) học cách trộn các dự đoán đó. Tên trong base_models phải là
+# một trong: LinearRegression, RidgeCV, DecisionTree, RandomForest,
+# ExtraTrees, GradientBoosting, XGBoost, CatBoost.
+stacking:
+  enabled: true
+  base_models: [RidgeCV, ExtraTrees, XGBoost, CatBoost]
+  final_alphas: [0.1, 1.0, 10.0, 100.0]
+  cv_splits: 5         # số fold để sinh dự đoán out-of-fold cho final_estimator
+  passthrough: false   # true = đưa cả feature gốc vào final_estimator
+
+# --- Hyperparameter tuning (tune.py) ---
+tuning:
+  n_iter: 15           # số tổ hợp RandomizedSearchCV thử cho mỗi model
+  search_cv_splits: 3  # số fold trong lúc tìm kiếm (so sánh cuối vẫn dùng cv.n_splits)

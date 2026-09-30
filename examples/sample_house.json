@@ -1,0 +1,16 @@
+{
+  "date": "2024-06-15",
+  "bedrooms": 3,
+  "bathrooms": 2,
+  "sqft_living": 1800,
+  "sqft_lot": 5000,
+  "floors": 1,
+  "waterfront": 0,
+  "view": 0,
+  "condition": 3,
+  "sqft_above": 1800,
+  "sqft_basement": 0,
+  "yr_built": 1995,
+  "yr_renovated": 0,
+  "city": "Seattle"
+}

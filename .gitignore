@@ -11,6 +11,10 @@ __pycache__/
 .ipynb_checkpoints/
 .venv/
 venv/
+.pytest_cache/
+
+# Môi trường tái lập (tự sinh bằng pip freeze, xem README)
+# requirements-lock.txt   <- nên COMMIT file này, đừng bỏ vào .gitignore
 
 # OS
 .DS_Store

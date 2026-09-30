@@ -6,8 +6,10 @@ Hàm đọc dữ liệu thô và dữ liệu đã xử lý.
 import pandas as pd
 from pathlib import Path
 
-RAW_DATA_PATH = Path("data/raw/modified_data.csv")
-PROCESSED_DATA_PATH = Path("data/processed/cleaned_data.csv")
+from config import CFG, resolve_path
+
+RAW_DATA_PATH = resolve_path(CFG["paths"]["raw_data"])
+PROCESSED_DATA_PATH = resolve_path(CFG["paths"]["processed_data"])
 
 
 def load_raw_data(path: Path = RAW_DATA_PATH) -> pd.DataFrame:

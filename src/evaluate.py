@@ -11,14 +11,13 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 from sklearn.model_selection import train_test_split
 
+from config import CFG, resolve_path
 from data_loader import load_processed_data
 from utils import get_final_estimator
 
-MODEL_PATH = Path("models/best_model.pkl")
-FIG_DIR = Path("outputs/figures")
-
-
-REPORT_DIR = Path("outputs/reports")
+MODEL_PATH = resolve_path(CFG["paths"]["model"])
+FIG_DIR = resolve_path(CFG["paths"]["figures_dir"])
+REPORT_DIR = resolve_path(CFG["paths"]["reports_dir"])
 
 
 def plot_predicted_vs_actual(y_true, y_pred):
@@ -114,6 +113,25 @@ def worst_predictions(y_true_usd, preds_usd, X_test, top_n=10) -> pd.DataFrame:
     return df.sort_values("abs_error", ascending=False).head(top_n)
 
 
+def stacking_weights(stacking_model, feature_names=None) -> pd.Series:
+    """Trọng số model cấp 2 gán cho từng base model của StackingRegressor.
+
+    Nếu stacking dùng passthrough=True, model cấp 2 còn nhận cả feature
+    gốc -> hệ số có thêm len(feature_names) phần tử; hàm gán tên cho cả
+    chúng (cần truyền feature_names) thay vì lỗi lệch độ dài.
+    """
+    coef = np.asarray(stacking_model.final_estimator_.coef_).ravel()
+    names = [n for n, _ in stacking_model.estimators]
+    if len(coef) != len(names):
+        if feature_names is None or len(coef) != len(names) + len(feature_names):
+            raise ValueError(
+                f"Số hệ số ({len(coef)}) không khớp {len(names)} base model"
+                " (+ feature nếu passthrough=True, khi đó cần truyền feature_names)."
+            )
+        names = names + list(feature_names)
+    return pd.Series(coef, index=names)
+
+
 def plot_feature_importance(model, feature_names, top_n=15):
     estimator = get_final_estimator(model)
 
@@ -122,6 +140,13 @@ def plot_feature_importance(model, feature_names, top_n=15):
     elif hasattr(estimator, "coef_"):
         # Với Linear/Ridge: dùng trị tuyệt đối hệ số (đã scale) làm "importance"
         values = np.abs(estimator.coef_)
+    elif hasattr(estimator, "final_estimator_"):
+        # Stacking: không có importance theo feature -> in trọng số trộn
+        # mà model cấp 2 gán cho từng base model
+        weights = stacking_weights(estimator, feature_names)
+        print("\nModel là Stacking -- trọng số trộn của từng base model:")
+        print(weights.round(3).to_string())
+        return
     else:
         print("Model này không hỗ trợ feature importance.")
         return
@@ -141,10 +166,12 @@ def main():
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
     df = load_processed_data()
 
-    X = df.drop(columns=["price"])
-    y = np.log1p(df["price"])
+    X = df.drop(columns=[CFG["data"]["target"]])
+    y = np.log1p(df[CFG["data"]["target"]])
 
-    _, X_test, _, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    _, X_test, _, y_test = train_test_split(
+        X, y, test_size=CFG["data"]["test_size"], random_state=CFG["seed"]
+    )
 
     model = joblib.load(MODEL_PATH)
     preds_log = model.predict(X_test)

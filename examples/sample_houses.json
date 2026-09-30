@@ -1,0 +1,11 @@
+[
+  {"date": "2024-06-15", "bedrooms": 3, "bathrooms": 2, "sqft_living": 1800, "sqft_lot": 5000,
+   "floors": 1, "waterfront": 0, "view": 0, "condition": 3, "sqft_above": 1800, "sqft_basement": 0,
+   "yr_built": 1995, "yr_renovated": 0, "city": "Seattle"},
+  {"date": "2024-06-15", "bedrooms": 5, "bathrooms": 3.5, "sqft_living": 3500, "sqft_lot": 8000,
+   "floors": 2, "waterfront": 1, "view": 4, "condition": 5, "sqft_above": 3000, "sqft_basement": 500,
+   "yr_built": 2010, "yr_renovated": 0, "city": "Bellevue"},
+  {"date": "2024-06-15", "bedrooms": 2, "bathrooms": 1, "sqft_living": 900, "sqft_lot": 2000,
+   "floors": 1, "waterfront": 0, "view": 0, "condition": 2, "sqft_above": 900, "sqft_basement": 0,
+   "yr_built": 1960, "yr_renovated": 0, "city": "ThanhPhoLaXaKhongCoTrongData"}
+]
